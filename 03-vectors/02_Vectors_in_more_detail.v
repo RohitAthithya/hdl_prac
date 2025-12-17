@@ -12,7 +12,7 @@ module top_module
 
     //declaring just "input" or "output" will implicity declare it as wire
 
-    localparam BYTE_SIZE        = 8;
+    localparam BYTE_SIZE = 8;
 
     genvar i;
     generate
