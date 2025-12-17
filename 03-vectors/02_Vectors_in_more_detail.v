@@ -1,41 +1,24 @@
+/* Problem statement: vector1
+* Build a combinational circuit that splits an input half-word (16 bits, [15:0] ) into lower [7:0] and upper [15:8] bytes.
+*/
 module top_module
-    #(
-        parameter NUM_BITS = 32
-    )
-    (
-        //outputs
-        output [NUM_BITS-1:0] out,
+#(
+    parameter   IN_NUMB_BITS = 16,
+    parameter   OUT_NUM_BITS = 8
+)
+(
+    //outputs
+	output [OUT_NUM_BITS - 1 : 0]   out_hi,
+	output [OUT_NUM_BITS - 1 : 0]   out_lo,
 
-        //inputs
-        input [NUM_BITS - 1:0] in
-    );
+    //input
+	input [IN_NUMB_BITS - 1 : 0]    in
+);
 
-    //declaring just "input" or "output" will implicity declare it as wire
+    assign {out_hi, out_lo}         = in;
 
-    localparam BYTE_SIZE = 8;
-
-    genvar i;
-    generate
-        for (i = 0; i < NUM_BITS; i = i + BYTE_SIZE) begin : byte_swap
-            assign out[(NUM_BITS - 1 -  i) -: BYTE_SIZE]  = in[(0 + i) 	 +: BYTE_SIZE];
-        end
-    endgenerate
-    //Hardcoded implementation: commented out
-    // assign out[(NUM_BITS - 1 -  0) -: BYTE_SIZE]  = in[(0) 	 +: BYTE_SIZE];
-    // assign out[(NUM_BITS - 1 -  8) -: BYTE_SIZE]  = in[(0 +  BYTE_SIZE) +: BYTE_SIZE];
-    // assign out[(NUM_BITS - 1 - 16) -: BYTE_SIZE]  = in[(0 + 16) +: BYTE_SIZE];
-    // assign out[(NUM_BITS - 1 - 24) -: BYTE_SIZE]  = in[(0 + 24) +: BYTE_SIZE];
+    //harcoded solution
+    // assign out_hi = in[15:8];
+    // assign out_lo = in[7:0];
 
 endmodule
-
-/*
-Errors & lessons in this code:
-    1.  when running on the quartus, the for loop was not able to generate the synthesisable code.
-    - so i had to use the generate block for the same
-    - also note that the use of the loop variable was done outside using the 'genvar' instead of int or any other type
-        -- this was done because of an error
-        -- ""Quartus also only supports i = i + const or i = i - const in a generate loop, not +=""
-    2. the for block must have a name: IN THE BEGIN STATEMENT!
-    3. short hand assignment operators are not allowed in the verilog code - atleast in the quartus!
-        -- i think this was not so in the synopsis compiler: Synopsys vcs
-*/
