@@ -9,7 +9,10 @@ module top_module
         //inputs
         input [NUM_BITS - 1:0] in
     );
-    localparam BYTE_SIZE        = 8;
+
+    //declaring just "input" or "output" will implicity declare it as wire
+
+    localparam BYTE_SIZE = 8;
 
     genvar i;
     generate
@@ -17,6 +20,7 @@ module top_module
             assign out[(NUM_BITS - 1 -  i) -: BYTE_SIZE]  = in[(0 + i) 	 +: BYTE_SIZE];
         end
     endgenerate
+    //Hardcoded implementation: commented out
     // assign out[(NUM_BITS - 1 -  0) -: BYTE_SIZE]  = in[(0) 	 +: BYTE_SIZE];
     // assign out[(NUM_BITS - 1 -  8) -: BYTE_SIZE]  = in[(0 +  BYTE_SIZE) +: BYTE_SIZE];
     // assign out[(NUM_BITS - 1 - 16) -: BYTE_SIZE]  = in[(0 + 16) +: BYTE_SIZE];
