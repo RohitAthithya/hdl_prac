@@ -10,6 +10,12 @@ module top_module
     output wire out_assign,
     output reg out_alwaysblock,
 
+    // output wire out_alwaysblock,
+    // note that in quartus: if this was declared 'wire' still, no warnings were seen.
+    // that's because quartus does not 'strictly' check for the declaration rather focuses on the
+    // synthesized code, since there was no analmaly in the synth. hardware,
+    // warning or error were not given!
+
     //inputs
     input a,
     input b
