@@ -28,27 +28,61 @@ module top_module
     input gas_tank_empty
 );
 
-    //shutdown computer only if cpu is really overheated, otherwise keep it on
+    //SOLUTION 4 - all the combinational logic goes in one procedural block
     always @(*) begin
+        //defaults
+        shut_off_computer = 1'b0;
+        keep_driving = 1'b1;
+
+        //logic
         if (cpu_overheated) begin
             shut_off_computer = 1'b1;
         end
-        else begin
-            shut_off_computer = 1'b0;
-        end
-    end
-
-
-    // stop vehicle if arrived or if you need refuel
-    always @(*) begin
         if (arrived || gas_tank_empty) begin
             keep_driving = 1'b0;
         end
-        else begin
-            keep_driving = 1'b1;
-        end
-
     end
+    // This is often preferred when many conditions affect the same outputs
+    // because it minimizes repeated else blocks and keeps latch‑avoidance explici
+
+
+
+    //SOLUTION 3 - keeping related signals together is key
+    // always @(*) begin
+    //     shut_off_computer = cpu_overheated;
+    // end
+
+    // always @(*) begin
+    //     keep_driving = ~(arrived || gas_tank_empty);
+    // end
+
+    //SOLUTION 2
+    // assign shut_off_computer = cpu_overheated;
+    // assign keep_driving = ~(arrived || gas_tank_empty);
+
+
+    //SOLUTION 1
+    //shutdown computer only if cpu is really overheated, otherwise keep it on
+    // always @(*) begin
+    //     if (cpu_overheated) begin
+    //         shut_off_computer = 1'b1;
+    //     end
+    //     else begin
+    //         shut_off_computer = 1'b0;
+    //     end
+    // end
+
+
+    // // stop vehicle if arrived or if you need refuel
+    // always @(*) begin
+    //     if (arrived || gas_tank_empty) begin
+    //         keep_driving = 1'b0;
+    //     end
+    //     else begin
+    //         keep_driving = 1'b1;
+    //     end
+
+    // end
 
 
 endmodule
