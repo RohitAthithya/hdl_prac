@@ -3,6 +3,7 @@
 * A "Population count" circuit counts the number of 1s in an input bector.
 * Build a population count circuit for a 255-bit input vector
 *
+* Note: Population count is also known as Hamming weight
 */
 module top_module
 #(
