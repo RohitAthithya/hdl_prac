@@ -1,2 +1,6 @@
 *.txt
 *.jpg
+./*simulation*
+simulation
+*.vcd
+*.json
