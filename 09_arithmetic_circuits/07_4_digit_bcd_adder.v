@@ -52,12 +52,12 @@ module top_module
     assign interim_carry[0] = cin;
 
     bcd_fadd bcd_fadd_array [NUM_DIGITS-1:0] (
-        .cout(interim_cout[NUM_DIGITS:1]),
+        .cout(interim_carry[NUM_DIGITS:1]),
         .sum(sum[NUM_BITS-1:0]),
 
         .a(a[NUM_BITS-1:0]),
         .b(b[NUM_BITS-1:0]),
-        .cin(interim_cout[NUM_DIGITS-1:0])
+        .cin(interim_carry[NUM_DIGITS-1:0])
     );
 
 endmodule
