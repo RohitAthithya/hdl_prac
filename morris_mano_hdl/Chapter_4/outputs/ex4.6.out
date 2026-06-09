@@ -1,0 +1,83 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1539-g2693dd32b)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 10;
+:vpi_module "C:\iverilog\lib\ivl\system.vpi";
+:vpi_module "C:\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "C:\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "C:\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "C:\iverilog\lib\ivl\va_math.vpi";
+:vpi_module "C:\iverilog\lib\ivl\v2009.vpi";
+S_00000143dccc6830 .scope package, "$unit" "$unit" 2 1;
+ .timescale 0 0;
+S_00000143dccc6e50 .scope module, "tb_majority_circuit" "tb_majority_circuit" 3 3;
+ .timescale -9 -10;
+v00000143dcca2720_0 .net *"_ivl_5", 2 0, v00000143dcd20130_0;  1 drivers
+v00000143dcca27c0_0 .net "a", 0 0, L_00000143dcd20090;  1 drivers
+v00000143dcca2860_0 .net "b", 0 0, L_00000143dcd20810;  1 drivers
+v00000143dcd20ef0_0 .net "c", 0 0, L_00000143dcd20310;  1 drivers
+v00000143dcd20130_0 .var "d", 2 0;
+v00000143dcd20f90_0 .net "y", 0 0, L_00000143dcca31c0;  1 drivers
+L_00000143dcd20090 .part v00000143dcd20130_0, 2, 1;
+L_00000143dcd20810 .part v00000143dcd20130_0, 1, 1;
+L_00000143dcd20310 .part v00000143dcd20130_0, 0, 1;
+S_00000143dccc6fe0 .scope module, "m1" "majority_circuit" 3 9, 4 2 0, S_00000143dccc6e50;
+ .timescale 0 0;
+    .port_info 0 /OUTPUT 1 "Y";
+    .port_info 1 /INPUT 1 "a";
+    .port_info 2 /INPUT 1 "b";
+    .port_info 3 /INPUT 1 "c";
+L_00000143dccc7210 .functor OR 1, L_00000143dcd20810, L_00000143dcd20310, C4<0>, C4<0>;
+L_00000143dce1bf30 .functor AND 1, L_00000143dcd20810, L_00000143dcd20310, C4<1>, C4<1>;
+L_00000143dccd6ac0 .functor AND 1, L_00000143dcd20090, L_00000143dccc7210, C4<1>, C4<1>;
+L_00000143dcca31c0 .functor OR 1, L_00000143dccd6ac0, L_00000143dce1bf30, C4<0>, C4<0>;
+v00000143dcca2d80_0 .net "Y", 0 0, L_00000143dcca31c0;  alias, 1 drivers
+v00000143dcca2fa0_0 .net "a", 0 0, L_00000143dcd20090;  alias, 1 drivers
+v00000143dccc7170_0 .net "b", 0 0, L_00000143dcd20810;  alias, 1 drivers
+v00000143dce1b6f0_0 .net "c", 0 0, L_00000143dcd20310;  alias, 1 drivers
+v00000143dce1b790_0 .net "y_g11", 0 0, L_00000143dccc7210;  1 drivers
+v00000143dccc69c0_0 .net "y_g12", 0 0, L_00000143dce1bf30;  1 drivers
+v00000143dccc6a60_0 .net "y_g21", 0 0, L_00000143dccd6ac0;  1 drivers
+    .scope S_00000143dccc6e50;
+T_0 ;
+    %vpi_call/w 3 18 "$dumpfile", "tb_majority_circuit.vcd" {0 0 0};
+    %vpi_call/w 3 19 "$dumpvars", 32'sb00000000000000000000000000000000, S_00000143dccc6e50 {0 0 0};
+    %end;
+    .thread T_0;
+    .scope S_00000143dccc6e50;
+T_1 ;
+    %delay 400, 0;
+    %vpi_call/w 3 22 "$finish" {0 0 0};
+    %end;
+    .thread T_1;
+    .scope S_00000143dccc6e50;
+T_2 ;
+    %vpi_call/w 3 25 "$display", "Testing majority circuit" {0 0 0};
+    %pushi/vec4 0, 0, 3;
+    %store/vec4 v00000143dcd20130_0, 0, 3;
+    %vpi_call/w 3 36 "$display", "Starting value of \011 a  b  c  -  y" {0 0 0};
+    %pushi/vec4 7, 0, 32;
+T_2.0 %dup/vec4;
+    %pushi/vec4 0, 0, 32;
+    %cmp/s;
+    %jmp/1xz T_2.1, 5;
+    %jmp/1 T_2.1, 4;
+    %pushi/vec4 1, 0, 32;
+    %sub;
+    %delay 30, 0;
+    %load/vec4 v00000143dcd20130_0;
+    %addi 1, 0, 3;
+    %store/vec4 v00000143dcd20130_0, 0, 3;
+    %jmp T_2.0;
+T_2.1 ;
+    %pop/vec4 1;
+    %vpi_call/w 3 39 "$monitor", "                  \011 %d  %d  %d  -  %d", v00000143dcca27c0_0, v00000143dcca2860_0, v00000143dcd20ef0_0, v00000143dcd20f90_0 {0 0 0};
+    %end;
+    .thread T_2;
+# The file index is used to find the file name in the following table.
+:file_names 5;
+    "N/A";
+    "<interactive>";
+    "-";
+    "tb_ex4.6.v";
+    "ex4.6.v";
