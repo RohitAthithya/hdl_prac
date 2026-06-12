@@ -4,3 +4,5 @@
 simulation
 *.vcd
 *.json
+*.out
+*output*
