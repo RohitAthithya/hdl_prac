@@ -16,13 +16,14 @@ module tb_bcd_to_7seg;
     
     task show_seg;
         input [6:0] val;
-        input bcd;
+        input [3:0] bcd;
         // Declare segment registers (a=top, b=top-right, c=bottom-right, d=bottom, 
         // e=bottom-left, f=top-left, g=middle)
         reg a, b, c, d, e, f, g;
+        begin
         
         // Assign val bits to segments
-        assign {a, b, c, d, e, f, g} = val;
+        {a, b, c, d, e, f, g} = val;
         
         // Display input value
         $display("\nthe given input bcd = %0d", bcd);
@@ -35,7 +36,7 @@ module tb_bcd_to_7seg;
         // |      |
         // |      |
         // |      |
-        //  ‾‾‾‾‾‾
+        //  ~~~~~~
         
         // Top segment (a)
         if (a == 1'b1) 
@@ -71,18 +72,21 @@ module tb_bcd_to_7seg;
         
         // Bottom segment (d)
         if (d == 1'b1) 
-            $display("‾‾‾‾‾‾"); 
+            $display(" ~~~~~~ "); 
         else 
             $display("       ");
+        end
     endtask
 
 
     initial begin
-        $monitor("the given input bcd = %0d  |  7 seg display: a=%b b=%b c=%b d=%b e=%b f=%b g=%b", bcd, a, b, c, d, e, f, g);
+        $monitor("the given input bcd = %0d  |  7 seg display: a=%b b=%b c=%b d=%b e=%b f=%b g=%b", bcd, val[6], val[5], val[4], val[3], val[2], val[1], val[0]);
         bcd = 4'b0000;
         repeat(10) begin
+            #1;
             show_seg(val, bcd);
-            #2 bcd = bcd + 1;
+            if (bcd < 4'd9)
+                #1 bcd = bcd + 1;
         end
 
         $finish;

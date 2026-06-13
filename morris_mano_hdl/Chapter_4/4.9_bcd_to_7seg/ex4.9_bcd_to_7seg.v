@@ -13,10 +13,10 @@ module bcd_to_7seg (
         a = w | (x ~^ z) | y;
         b = w | x_ | (y ~^ z);
         c = x | y_ | z;
-        d = z_ | w | (y&x_);
+        d = (x & y_ & z) | (y & z_) | (x_ & y) | w | (x_ & z_);
         e = (x_|y) & z_;
         f = w | (x & (z_ | y_)) | (y_ & z_) ;
-        g = w | (x^y) | (y_&z);
+        g = w | (x^y) | (y&z_);
     end
 
 endmodule
