@@ -6,3 +6,4 @@ simulation
 *.json
 *.out
 *output*
+*.codex

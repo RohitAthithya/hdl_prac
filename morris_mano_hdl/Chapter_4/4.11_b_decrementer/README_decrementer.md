@@ -17,9 +17,9 @@ Design a four-bit combinational **decrementer**, a circuit that subtracts `1` fr
 ## Quick Navigation
 
 - **Approach 1 - required by the question:** half-adders plus borrow-propagation logic  
-  [Verilog solution](./4.10_b_decrementer.v) | [testbench](./tb_4.10_b_decrementer.v) | [math appendix](#appendix-a-approach-1-borrow-propagation)
+  [Verilog solution](./4.11_b_decrementer.v) | [testbench](./tb_4.11_b_decrementer.v) | [math appendix](#appendix-a-approach-1-borrow-propagation)
 - **Approach 2 - extra comparison:** full-adder/two's-complement style decrementer  
-  [Verilog solution](./decrementer_with_FA.v) | [same testbench](./tb_4.10_b_decrementer.v) | [math appendix](#appendix-b-approach-2-full-adder-method)
+  [Verilog solution](./decrementer_with_FA.v) | [same testbench](./tb_4.11_b_decrementer.v) | [math appendix](#appendix-b-approach-2-full-adder-method)
 - [Borrow flag and signed/unsigned notes](#appendix-c-borrow-flag-and-signed-vs-unsigned)
 - [Tools used](#tools-used)
 
@@ -52,7 +52,7 @@ This is the intended solution for the question. Each bit uses one half-adder for
 
 ### Verilog Code
 
-Source: [4.10_b_decrementer.v](./4.10_b_decrementer.v)
+Source: [4.11_b_decrementer.v](./4.11_b_decrementer.v)
 
 The design instantiates four `HA_1bit` modules. The half-adder `sum` output becomes `diff[i]`; the half-adder `carry` output is intentionally unused. Borrow propagation is handled separately:
 
@@ -64,7 +64,7 @@ assign interim_borrow[i+1] = interim_borrow[i] & (~(a[i]));
 
 ### Testbench
 
-Source: [tb_4.10_b_decrementer.v](./tb_4.10_b_decrementer.v)
+Source: [tb_4.11_b_decrementer.v](./tb_4.11_b_decrementer.v)
 
 [Go to top](#top)
 
@@ -106,7 +106,7 @@ This works, but answer doesn't qualify constraint of using 4 Half adders
 
 ### Testbench
 
-Source: [tb_4.10_b_decrementer.v](./tb_4.10_b_decrementer.v)
+Source: [tb_4.11_b_decrementer.v](./tb_4.11_b_decrementer.v)
 
 The same testbench can be reused because both approaches expose the same `decrementer_4bit` module interface.
 
