@@ -1,243 +1,206 @@
-# 4-Bit Combinational Decrementer using Half-Adders
+<a id="top"></a>
 
-> **Problem Source:** M. Morris Mano & Michael D. Ciletti — *Digital Design: With an Introduction to the Verilog HDL*, 5th Edition — Problem 4.11(b)
+# 4-Bit Combinational Decrementer using Half-Adders (Also Includes Full-Adder Approach)
 
----
+> **Question from:** M. Morris Mano & Michael D. Ciletti - *Digital Design: With an Introduction to the Verilog HDL*, 5th Edition - Problem 4.11(b)
 
 ## Problem Statement
 
-Design a four-bit combinational **decrementer** — a circuit that subtracts 1 from a four-bit binary number — using **only four half-adders** and additional simple logic gates (inverters, AND gates). Full adders are explicitly **not allowed**.
+    4.11 Using four half-adders (HDL-see Problem 4.52),
+    (a) Design a full-subtractor circuit incrementer. (A circuit that adds one to a four-bit binary number.)
+    (b) Design a four-bit combinational decrementer (a circuit that subtracts 1 from a fourbit binary number)
 
----
+**Complete problem definition with constraints solved here:**
 
-## Why This Is Different From Most Online Solutions
+Design a four-bit combinational **decrementer**, a circuit that subtracts `1` from a four-bit binary number, using **only four half-adders** and simple logic gates. Full adders are not part of the required book solution.
 
-Almost every YouTube video and online resource implements a 4-bit decrementer by chaining **four full adders** and adding the 2's complement of 1 (`1111`) to the input. This works, but each full adder internally contains two half-adders and an OR gate — meaning you're using a lot more hardware than necessary for the specific case of subtracting a constant value of 1.
+## Quick Navigation
 
-The constraint here is deliberate: **only four half-adders**. This forces you to think about the circuit from first principles using the **borrow-propagation method**, which is more hardware-efficient for this specific task and directly mirrors how paper-and-pencil binary subtraction works.
+- **Approach 1 - required by the question:** half-adders plus borrow-propagation logic  
+  [Verilog solution](./4.10_b_decrementer.v) | [testbench](./tb_4.10_b_decrementer.v) | [math appendix](#appendix-a-approach-1-borrow-propagation)
+- **Approach 2 - extra comparison:** full-adder/two's-complement style decrementer  
+  [Verilog solution](./decrementer_with_FA.v) | [same testbench](./tb_4.10_b_decrementer.v) | [math appendix](#appendix-b-approach-2-full-adder-method)
+- [Borrow flag and signed/unsigned notes](#appendix-c-borrow-flag-and-signed-vs-unsigned)
+- [Tools used](#tools-used)
 
----
+----------
 
-## Mathematical Foundation
+Decrementer - must compute:
 
-### Binary Subtraction With Borrow Propagation
-
-When subtracting 1 from a binary number bit-by-bit, starting from the LSB:
-
-For each bit position `i`, given input bit `X_i` and incoming borrow `borrow_i`:
-
-- **Difference bit:**  
-  `Y_i = X_i ⊕ borrow_i`
-
-- **Borrow to next bit:**  
-  `borrow_{i+1} = (NOT X_i) AND borrow_i`
-
-The borrow propagates to the next position only if the current bit is 0 (i.e., it cannot give — it must borrow from above).
-
-We start with `borrow_0 = 1` because we are subtracting 1.
-
-### Expanded Equations for All 4 Bits
-
-Starting with `borrow_0 = 1`:
+```text
+diff = a - 1
+```
+### NOTE: Following are some corner cases in decrementer circuit.
+```
+Signed:
+  - 0000 - 1 => diff = 1111 (-1) | borrow = 1 | overflow/underflow = 0 
+  - 1111 - 1 => diff = 1110 (-2) | borrow = 0 | overflow/underflow = 0
+  - 1000 - 1 => diff = 0111 (+7) | borrow = 0 | overflow = 1 
+  ---- expected diff = 1 0111(-9)| borrow = 0 | overflow/underflow = 0 
+Unsigned:
+  - 0000 - 1 => diff = 1111 (15) | borrow = 1 | underflow = 1
+  - 1111 - 1 => diff = 1110 (14) | borrow = 0 | overflow = 0
+  - 1000 - 1 => diff = 0111 (7)  | borrow = 0 | overflow = 0
 
 ```
-Y_0 = X_0 ⊕ 1  =  NOT(X_0)
-borrow_1 = NOT(X_0) · 1  =  NOT(X_0)
+_Of course: Signed or unsigned is interpreted by Humans, For hardware its just the bits_
 
-Y_1 = X_1 ⊕ borrow_1
-borrow_2 = NOT(X_1) · borrow_1  =  NOT(X_1) · NOT(X_0)
+----
+## Approach 1: Half-Adders And Borrow Logic
 
-Y_2 = X_2 ⊕ borrow_2
-borrow_3 = NOT(X_2) · borrow_2  =  NOT(X_2) · NOT(X_1) · NOT(X_0)
+This is the intended solution for the question. Each bit uses one half-adder for the difference bit, while the borrow chain is created with inverters and AND gates.
 
-Y_3 = X_3 ⊕ borrow_3
-borrow_4 = NOT(X_3) · borrow_3  ← underflow/borrow-out flag
-```
+### Verilog Code
 
-### Role of the Half-Adder
+Source: [4.10_b_decrementer.v](./4.10_b_decrementer.v)
 
-A half-adder takes two single-bit inputs `A` and `B` and produces:
-- `Sum = A ⊕ B`
-- `Carry = A · B`
-
-The XOR is exactly what we need for the difference bit at each stage. The carry output of the half-adder is not used here; the borrow propagation is computed separately with an inverter and AND gate. This is why only the XOR part of each half-adder is consumed, and the circuit uses **exactly four half-adders** — one per bit.
-
----
-
-## Circuit Architecture
-_see image_: https://imgur.com/a/5QX4ea4
-
-**Total hardware used:**
-- 4 Half-Adders (using only their XOR/Sum output)
-- 4 Inverters
-- 4 AND gates
-
-No full adders. No 2's complement adder chain.
-
----
-
-## Verilog Implementation
-
-### Half-Adder Module (`HA_1bit`)
+The design instantiates four `HA_1bit` modules. The half-adder `sum` output becomes `diff[i]`; the half-adder `carry` output is intentionally unused. Borrow propagation is handled separately:
 
 ```verilog
-module HA_1bit (
-    output sum, carry,
-    input  a, b
-);
-    assign {carry, sum} = a + b;
-endmodule
+assign interim_borrow[i+1] = interim_borrow[i] & (~(a[i]));
 ```
 
-A clean, idiomatic 1-line half-adder. The `{carry, sum}` packing correctly places the carry in the MSB of the 2-bit result.
+[Go to top](#top)
 
-### 4-Bit Decrementer Module (`decrementer_4bit`)
+### Testbench
+
+Source: [tb_4.10_b_decrementer.v](./tb_4.10_b_decrementer.v)
+
+[Go to top](#top)
+
+### Simulation Output
+
+```text
+inp=0  -> diff=1111, borrow=1
+inp=1  -> diff=0000, borrow=0
+inp=2  -> diff=0001, borrow=0
+...
+inp=15 -> diff=1110, borrow=0
+```
+
+[Go to top](#top)
+
+### Output Explanation
+
+Every output is `input - 1`. The only underflow case is `0000 - 1`, so `borrow` is `1` only for input `0`.
+
+[Go to top](#top)
+
+## Approach 2: Full-Adder / Two's-Complement Method
+
+This approach is included only for comparison. It subtracts `1` by adding `1111`, which is the 4-bit two's-complement representation of `-1`.
+
+### Verilog Code
+
+Source: [decrementer_with_FA.v](./decrementer_with_FA.v)
+
+The LSB is handled with a half-adder, and the upper bits use full adders:
 
 ```verilog
-module decrementer_4bit (
-    output wire [3:0] diff,
-    output wire       borrow,
-    input  wire [3:0] a
-);
-    wire [4:0] interim_borrow;
-
-    assign interim_borrow[0] = 1'b1;           // borrow-in = 1 (subtracting 1)
-    assign borrow = interim_borrow[4];         // borrow-out = underflow flag
-
-    genvar i;
-    generate
-        for (i = 0; i < 4; i = i + 1) begin
-            HA_1bit hx (
-                .sum(diff[i]), .carry(),        // carry output unused
-                .a(a[i]), .b(interim_borrow[i])
-            );
-            assign interim_borrow[i+1] = interim_borrow[i] & (~a[i]);
-        end
-    endgenerate
-
-endmodule
+HA_1bit HA0 (... .a(a[0]), .b(1'b1));
+FA_1bit FAx (... .a(a[i]), .b(1'b1), .carry_in(interim_borrow[i]));
 ```
 
-**Design notes:**
-- `interim_borrow` is declared as `wire [4:0]`, not `reg`, because it is driven by continuous `assign` statements.
-- The `generate` loop programmatically instantiates the four half-adders and borrow-chain logic.
-- `.carry()` is intentionally left unconnected — the HA carry output is not needed; borrow propagation is handled explicitly.
-- The `assign` inside `generate` is structural continuous assignment, which is the correct construct in this context.
+This works, but answer doesn't qualify constraint of using 4 Half adders
+[Go to top](#top)
 
----
+### Testbench
 
-## Testbench
+Source: [tb_4.10_b_decrementer.v](./tb_4.10_b_decrementer.v)
 
-```verilog
-`timescale 1ps/1ps
+The same testbench can be reused because both approaches expose the same `decrementer_4bit` module interface.
 
-module tb_decrementer;
+[Go to top](#top)
 
-    reg  [3:0] inp;
-    wire [3:0] diff;
-    wire       borrow;
+### Simulation Output
 
-    decrementer_4bit DUT (
-        .diff(diff), .borrow(borrow),
-        .a(inp)
-    );
+The output sequence should match Approach 1:
 
-    initial begin
-        $dumpfile("tb_decrementer_view.vcd");
-        $dumpvars(0, tb_decrementer);
-    end
-
-    initial begin
-        $monitor(" inp=(%d) => o/p: diff=(%b) ;; borrow=(%b)", inp, diff, borrow);
-        #0;
-        inp = 4'b0000;
-        repeat(16) begin
-            #1 inp = inp + 1;
-        end
-    end
-
-endmodule
+```text
+inp=0  -> diff=1111, borrow=1
+inp=1  -> diff=0000, borrow=0
+...
+inp=15 -> diff=1110, borrow=0
 ```
 
-**Testbench notes:**
-- `$monitor` is placed before the first assignment so the initial state is captured.
-- `repeat(16)` steps through all 16 values starting from `0001` (after the initial `0000`), covering the wrap-around case `0000` again at the end.
-- Both `diff` and `borrow` (underflow flag) are monitored.
+[Go to top](#top)
 
----
+### Output Explanation
 
-## Simulation Output
+Adding `1111` is equivalent to subtracting `1` modulo 16. The final carry is inverted to form the unsigned `borrow` flag.
 
-```
-VCD info: dumpfile tb_decrementer_view.vcd opened for output.
- inp=( 0) => o/p: diff=(1111) ;; borrow=(1)
- inp=( 1) => o/p: diff=(0000) ;; borrow=(0)
- inp=( 2) => o/p: diff=(0001) ;; borrow=(0)
- inp=( 3) => o/p: diff=(0010) ;; borrow=(0)
- inp=( 4) => o/p: diff=(0011) ;; borrow=(0)
- inp=( 5) => o/p: diff=(0100) ;; borrow=(0)
- inp=( 6) => o/p: diff=(0101) ;; borrow=(0)
- inp=( 7) => o/p: diff=(0110) ;; borrow=(0)
- inp=( 8) => o/p: diff=(0111) ;; borrow=(0)
- inp=( 9) => o/p: diff=(1000) ;; borrow=(0)
- inp=(10) => o/p: diff=(1001) ;; borrow=(0)
- inp=(11) => o/p: diff=(1010) ;; borrow=(0)
- inp=(12) => o/p: diff=(1011) ;; borrow=(0)
- inp=(13) => o/p: diff=(1100) ;; borrow=(0)
- inp=(14) => o/p: diff=(1101) ;; borrow=(0)
- inp=(15) => o/p: diff=(1110) ;; borrow=(0)
- inp=( 0) => o/p: diff=(1111) ;; borrow=(1)
+[Go to top](#top)
+
+-------
+-------
+## Appendix A: Approach 1 Borrow Propagation
+
+For each bit position `i`:
+
+```text
+diff[i]     = a[i] XOR borrow[i]
+borrow[i+1] = NOT(a[i]) AND borrow[i]
 ```
 
-### Output Verification Table
+The chain starts with `borrow[0] = 1` because the circuit is subtracting one.
 
-| inp (dec) | inp (bin) | diff (bin) | diff (dec) | borrow | Correct? |
-|-----------|-----------|------------|------------|--------|----------|
-| 0  | 0000 | 1111 | 15 | 1 | ✅ underflow (0 - 1 wraps to 15) |
-| 1  | 0001 | 0000 | 0  | 0 | ✅ |
-| 2  | 0010 | 0001 | 1  | 0 | ✅ |
-| 3  | 0011 | 0010 | 2  | 0 | ✅ |
-| 4  | 0100 | 0011 | 3  | 0 | ✅ |
-| 5  | 0101 | 0100 | 4  | 0 | ✅ |
-| 6  | 0110 | 0101 | 5  | 0 | ✅ |
-| 7  | 0111 | 0110 | 6  | 0 | ✅ |
-| 8  | 1000 | 0111 | 7  | 0 | ✅ |
-| 9  | 1001 | 1000 | 8  | 0 | ✅ |
-| 10 | 1010 | 1001 | 9  | 0 | ✅ |
-| 11 | 1011 | 1010 | 10 | 0 | ✅ |
-| 12 | 1100 | 1011 | 11 | 0 | ✅ |
-| 13 | 1101 | 1100 | 12 | 0 | ✅ |
-| 14 | 1110 | 1101 | 13 | 0 | ✅ |
-| 15 | 1111 | 1110 | 14 | 0 | ✅ |
+Expanded for four bits:
 
-All 16 input combinations produce the correct output.
+```text
+diff[0] = a[0] XOR 1       = NOT(a[0])
+borrow[1] = NOT(a[0])
 
----
+diff[1] = a[1] XOR borrow[1]
+borrow[2] = NOT(a[1]) AND NOT(a[0])
 
-## Understanding the `borrow` Output Flag
+diff[2] = a[2] XOR borrow[2]
+borrow[3] = NOT(a[2]) AND NOT(a[1]) AND NOT(a[0])
 
-The `borrow` output is **not** a signed overflow flag. It is a **unsigned underflow indicator**.
+diff[3] = a[3] XOR borrow[3]
+borrow[4] = NOT(a[3]) AND borrow[3]
+```
 
-- `borrow = 1` only when input is `0000` (decimal 0), which underflows to `1111` (decimal 15, or -1 in signed 2's complement). This is equivalent to modulo-16 subtraction: `0 - 1 ≡ 15 (mod 16)`.
-- `borrow = 0` for all inputs `0001` through `1111`, meaning the subtraction completed without underflow.
+A half-adder already gives `sum = A XOR B`, so it naturally produces each `diff[i]`. Its carry output is not the borrow; the borrow is computed explicitly with simple logic.
 
-For signed 2's complement interpretation, the signed overflow case would be `1000` (-8) → `0111` (+7), but this requires a separate overflow detection circuit (comparing carry-into vs carry-out of the MSB), which is beyond this problem's scope.
+[Go to top](#top)
 
----
+## Appendix B: Approach 2 Full-Adder Method
 
-## Signed vs Unsigned — Does It Matter?
+Subtraction by one can also be written as:
 
-No, the same hardware works for both interpretations. Both the borrow-based decrementer and a 2's complement adder implement the same modulo-2⁴ operation. The difference is only in how you interpret the bit pattern:
+```text
+a - 1 = a + (-1)
+```
 
-- **Unsigned:** `0000` → `1111` is underflow; borrow flag signals it.
-- **Signed 2's complement:** `0000` (0) → `1111` (-1) is a valid result with no overflow.
+In 4-bit two's complement, `-1` is `1111`, so the full-adder approach computes:
 
-The gates don't change — only your interpretation of the output changes.
+```text
+a + 1111
+```
 
----
+This gives the same 4-bit `diff` output as Approach 1. For unsigned interpretation, the final carry tells whether the subtraction needed a borrow:
+
+```text
+borrow = NOT(final_carry)
+```
+
+[Go to top](#top)
+
+## Appendix C: Borrow Flag And Signed Vs Unsigned
+
+`borrow` is an unsigned underflow flag, not a signed overflow flag.
+
+- Unsigned view: `0000 -> 1111` means `0 - 1` wrapped around, so `borrow = 1`.
+- Signed two's-complement view: `0000 -> 1111` means `0 -> -1`, which is a valid signed result.
+
+The gates do not change. Only the interpretation of the 4-bit result changes.
+
+[Go to top](#top)
 
 ## Tools Used
 
-- **Simulator:** Icarus Verilog (`iverilog`, `vvp`)
-- **Waveform Viewer:** GTKWave
-- **Reference:** M. Morris Mano & M. D. Ciletti, *Digital Design with Verilog HDL*, 5th Ed., Problem 4.11(b)
+- Simulator: Icarus Verilog (`iverilog`, `vvp`)
+- Waveform viewer: GTKWave
+- Reference: M. Morris Mano & M. D. Ciletti, *Digital Design with Verilog HDL*, 5th Ed., Problem 4.11(b)
+
+[Go to top](#top)
