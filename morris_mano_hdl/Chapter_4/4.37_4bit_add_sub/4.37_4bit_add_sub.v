@@ -41,6 +41,33 @@ module adder_4bit (
 endmodule
 
 
+// THIS IMPLEMENTATION IS USING THE GATE-Hierarchical flow
+// module four_bit_add_sub ( //unsigned 4 bit adder_subtractor circuit - (no overflow bit)
+//     output [3: 0] sum, 
+//     output C4,
+
+//     input [3:0] A, 
+//     input [3:0] B,
+//     input mode // mode =0 => adder, mode=1 => subtractor
+// );
+
+//     wire [3:0] b_gated;
+//     xor
+//         g_xor_3 (b_gated[3], B[3], mode), //mode=0 => pass, mode=1 => toggle
+//         g_xor_2 (b_gated[2], B[2], mode), 
+//         g_xor_1 (b_gated[1], B[1], mode), 
+//         g_xor_0 (b_gated[0], B[0], mode); 
+
+//     adder_4bit 
+//         F4addsub (
+//             .sum(sum), .C4(C4),
+//             .A(A), .B(b_gated), .C0(mode)
+//         );
+
+
+
+// endmodule
+
 
 module four_bit_add_sub ( //unsigned 4 bit adder_subtractor circuit - (no overflow bit)
     output [3: 0] sum, 
@@ -52,11 +79,19 @@ module four_bit_add_sub ( //unsigned 4 bit adder_subtractor circuit - (no overfl
 );
 
     wire [3:0] b_gated;
-    xor
-        g_xor_3 (b_gated[3], B[3], mode), //mode=0 => pass, mode=1 => toggle
-        g_xor_2 (b_gated[2], B[2], mode), 
-        g_xor_1 (b_gated[1], B[1], mode), 
-        g_xor_0 (b_gated[0], B[0], mode); 
+    // xor
+        // g_xor_3 (b_gated[3], B[3], mode), //mode=0 => pass, mode=1 => toggle
+        // g_xor_2 (b_gated[2], B[2], mode), 
+        // g_xor_1 (b_gated[1], B[1], mode), 
+        // g_xor_0 (b_gated[0], B[0], mode); 
+        
+    // assign b_gated[3] = (mode == 1'b1) ? ~(B[3]): B[3]; 
+    // assign b_gated[2] = (mode == 1'b1) ? ~(B[2]): B[2]; 
+    // assign b_gated[1] = (mode == 1'b1) ? ~(B[1]): B[1]; 
+    // assign b_gated[0] = (mode == 1'b1) ? ~(B[0]): B[0]; 
+        
+        //in oneline
+    assign b_gated = (mode == 1'b1) ? ~B: B;
 
     adder_4bit 
         F4addsub (
@@ -64,6 +99,5 @@ module four_bit_add_sub ( //unsigned 4 bit adder_subtractor circuit - (no overfl
             .A(A), .B(b_gated), .C0(mode)
         );
 
-
-
 endmodule
+
