@@ -7,3 +7,4 @@ simulation
 *.out
 *output*
 *.codex
+*create_files.py
