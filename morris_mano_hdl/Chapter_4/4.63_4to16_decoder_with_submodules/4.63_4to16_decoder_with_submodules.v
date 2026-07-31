@@ -29,7 +29,7 @@ module decoder_4_to_16 (
     decoder_2_to_4 dec1 (
         .out({wx, wx_, w_x, w_x_}),
         .x(w), .y(x),
-        .enable()
+        .enable(1) //this enable decides the final output as 2to4 decoder is with enable
     ); 
     
     decoder_2_to_4 dec2 (
@@ -47,7 +47,7 @@ module decoder_4_to_16 (
         .x(y), .y(z),
         .enable(w_x)
     ); 
-    decoder_2_to_4 dec2 (
+    decoder_2_to_4 dec5 (
         .out(out[3:0]),
         .x(y), .y(z),
         .enable(w_x_)
