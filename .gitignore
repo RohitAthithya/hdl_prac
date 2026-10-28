@@ -1,2 +1,10 @@
 *.txt
 *.jpg
+./*simulation*
+simulation
+*.vcd
+*.json
+*.out
+*output*
+*.codex
+*create_files.py

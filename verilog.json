@@ -1,48 +1,77 @@
 {
-    "Comment: Question": {
-        "prefix": "comment",
-        "body": [
-            "/* Problem statement: $1",
-            "* $2",
-            "*/",
-            "$0"
-        ],
-        "description": "Comment to printed on the top of the solution files for describing the problem the statements"
-    },
-    "Instantiation_no_params": {
-        "prefix": "module_no_param",
-        "body": [
-            "${1:module_name} ${2: instance_name} (",
-            "    $3",
-            ");$0"
-        ],
-        "description": "Instantiate a module with no parameters"
-    },
-    "multiple line assign statement": {
-        "prefix": "assign_multi_line",
-        "body": [
-            "assign ${1:output} = (",
-            "    $2",
-            ");$0"
-        ],
-        "description": "Instantiate a module with no parameters"
-    },
-    "Top module with no params": {
-        "prefix": "top_module_no_params",
-        "body": [
-            "module top_module",
-            "(",
-            "    //output(s)",
-            "    output ${1}",
-            "",
-            "    //input(s)",
-            "    input ${2}",
-            ");",
-            "",
-            "    ${0: description...}",
-            "",
-            "endmodule",
-        ],
-        "description": "Instantiate a module with no parameters"
-    },
+	"Comment: Question": {
+		"prefix": "comment",
+		"body": [
+			"/* Problem statement: $1",
+			"* $2",
+			"*/",
+			"$0"
+		],
+		"description": "Comment to printed on the top of the solution files for describing the problem the statements"
+	},
+	"Instantiation_no_params": {
+		"prefix": "module_no_param",
+		"body": [
+			"${1:module_name} ${2: instance_name} (",
+			"    $3",
+			");$0"
+		],
+		"description": "Instantiate a module with no parameters"
+	},
+	"multiple line assign statement": {
+		"prefix": "assign_multi_line",
+		"body": [
+			"assign ${1:output} = (",
+			"    $2",
+			");$0"
+		],
+		"description": "Instantiate a module with no parameters"
+	},
+	"Top module with no params": {
+		"prefix": "top_module_no_params",
+		"body": [
+			"module top_module",
+			"(",
+			"    //output(s)",
+			"    output ${1}",
+			"",
+			"    //input(s)",
+			"    input ${2}",
+			");",
+			"",
+			"    ${0: description...}",
+			"",
+			"endmodule",
+		],
+		"description": "Instantiate a module with no parameters"
+	},
+	"Top module with params": {
+		"prefix": "top_module_WITH_params",
+		"body": [
+			"module top_module",
+			"#(",
+			"    parameter ${1}",
+			")",
+			"(",
+			"    //output(s)",
+			"    output ${2}",
+			"",
+			"    //input(s)",
+			"    input ${3}",
+			");",
+			"",
+			"    ${0: description...}",
+			"",
+			"endmodule"
+		],
+		"description": "Instantiate a module with no parameters"
+	},
+	"local params in description": {
+		"prefix": "localparam",
+		"body": [
+			"localparam ${1:SOME_PARAM_IN_CAPS} = ${2:value of that parameter};",
+			"$0"
+		],
+		"description": "Instantiate a module with no parameters"
+	}
 }
